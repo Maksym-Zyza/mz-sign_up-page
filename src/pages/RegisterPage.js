@@ -1,6 +1,6 @@
 import React from 'react';
 import RegisterForm from '../components/RegisterForm';
-import '../styles.css';
+import '../styles.scss';
 
 export default function RegisterPage() {
   return (

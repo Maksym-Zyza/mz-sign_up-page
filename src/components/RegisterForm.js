@@ -3,7 +3,7 @@ import Logo from '../img/Logo';
 import Male from '../img/Male';
 import Female from '../img/Female';
 import Other from '../img/Other';
-import '../styles.css';
+import '../styles.scss';
 
 export default function RegisterForm() {
   const [gender, setGender] = useState('');
