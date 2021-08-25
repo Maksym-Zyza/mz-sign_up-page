@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
-// import { Formik, Field, Form } from 'formik';
+import { Formik, Field, Form } from 'formik';
 import * as yup from 'yup';
+import MatchMessage from './MatchMessage';
 import Logo from '../img/Logo';
 import Gender from './Gender';
 import Button from './Button';
 import Footer from './Footer';
 import Eye from '../img/Eye';
-import MatchMessage from './MatchMessage';
 import '../styles.scss';
 
 const schema = yup.object({
   email: yup
     .string('Enter a email')
-    .email('Email should contains at least 3 characters')
+    .min(3, 'Email should contains at least 3 characters')
+    .email('Must contain e-mail')
     .required('Email is required'),
   password: yup
+    .string('Enter your password')
+    .min(6, 'Password should contains at least 5 characters')
+    .required('Password is required'),
+  coPassword: yup
     .string('Enter your password')
     .min(6, 'Password should contains at least 5 characters')
     .required('Password is required'),
@@ -22,19 +27,24 @@ const schema = yup.object({
 
 export default function RegisterForm() {
   const [email, setEmail] = useState('');
-  const updateEmail = e => {
-    setEmail(e.target.value);
-  };
-
   const [password, setPassword] = useState('');
-  const updatePassword = e => {
-    setPassword(e.target.value);
-  };
-
   const [coPassword, setCoPassword] = useState('');
-  const updateCoPassword = e => {
-    setCoPassword(e.target.value);
-    setMatch(password === e.target.value);
+  const [match, setMatch] = useState(false);
+  const [registration, setRegistration] = useState(false);
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setMatch(password === value);
+    switch (name) {
+      case 'email':
+        return setEmail(value);
+      case 'password':
+        return setPassword(value);
+      case 'coPassword':
+        return setCoPassword(value);
+      default:
+        return;
+    }
   };
 
   const [gender, setGender] = useState('');
@@ -42,7 +52,6 @@ export default function RegisterForm() {
     setGender(e.target.value);
   };
 
-  const [match, setMatch] = useState(false);
   const [hide, setHide] = useState('password');
   const tooglePass = () => {
     setHide(hide === 'text' ? 'password' : 'text');
@@ -53,21 +62,111 @@ export default function RegisterForm() {
     setHideCoPass(hideCoPass === 'text' ? 'password' : 'text');
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-
+  const handleSubmit = (
+    { email, password, coPassword },
+    { resetForm, setSubmitting },
+  ) => {
     console.log({ gender, email, password, coPassword });
 
-    setGender('');
-    setEmail('');
-    setPassword('');
-    setCoPassword('');
-    setMatch(false);
+    setSubmitting(false);
+    resetForm();
+    setRegistration(true);
   };
 
   return (
-    <div>
-      <form
+    <>
+      {registration ? (
+        <h1 className="success">Success!</h1>
+      ) : (
+        <Formik
+          initialValues={{
+            email: '',
+            password: '',
+            coPassword: '',
+          }}
+          validationSchema={schema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched }) => (
+            <Form
+              className="authForm"
+              autoComplete="off"
+              onChange={handleChange}
+            >
+              <Logo />
+              <h1 className="title">Sign Up with email</h1>
+
+              <Gender updateGender={updateGender} />
+
+              <label className="authLabel">
+                E-mail
+                <Field
+                  className={`${'input'} ${
+                    touched.email && errors.email && 'errorInput'
+                  }`}
+                  type="email"
+                  name="email"
+                  value={email}
+                  placeholder=" "
+                />
+                {touched.email && errors.email && (
+                  <div className="error">{errors.email}</div>
+                )}
+              </label>
+
+              <label className="authLabel">
+                Create Password
+                <span onClick={tooglePass}>
+                  <Eye />
+                </span>
+                <Field
+                  className={`${'input'} ${
+                    touched.password && errors.password && 'errorInput'
+                  }`}
+                  type={hide}
+                  name="password"
+                  value={password}
+                  placeholder=" "
+                />
+                {touched.password && errors.password && (
+                  <div className="error">{errors.password}</div>
+                )}
+              </label>
+
+              <label className="authLabel">
+                Confirm Password
+                <span onClick={toogleCoPass}>
+                  <Eye />
+                </span>
+                <Field
+                  className={`${'input'} ${
+                    touched.coPassword && errors.coPassword && 'errorInput'
+                  }`}
+                  type={hideCoPass}
+                  name="coPassword"
+                  value={coPassword}
+                  placeholder=" "
+                />
+                {touched.coPassword && errors.coPassword && (
+                  <div className="error">{errors.coPassword}</div>
+                )}
+              </label>
+
+              {!match && coPassword.length > 5 && <MatchMessage />}
+
+              <Button />
+
+              <Footer />
+            </Form>
+          )}
+        </Formik>
+      )}
+    </>
+  );
+}
+
+// =========
+/* <form
         onSubmit={handleSubmit}
         validationSchema={schema}
         className="authForm"
@@ -117,15 +216,10 @@ export default function RegisterForm() {
           />
         </label>
 
-        {/* {password.length > 0 && password.length < 6 && (
-          <p className="error">Password must be longer than six characters</p>
-        )} */}
+        
         {!match && coPassword.length > 5 && <MatchMessage />}
 
         <Button />
 
         <Footer />
-      </form>
-    </div>
-  );
-}
+      </form> */
