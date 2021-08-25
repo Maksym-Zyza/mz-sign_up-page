@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
+// import { Formik, Field, Form } from 'formik';
+import * as yup from 'yup';
 import Logo from '../img/Logo';
-import Male from '../img/Male';
-import Female from '../img/Female';
-import Other from '../img/Other';
+import Gender from './Gender';
+import Button from './Button';
+import Footer from './Footer';
+import Eye from '../img/Eye';
+import MatchMessage from './MatchMessage';
 import '../styles.scss';
 
-export default function RegisterForm() {
-  const [gender, setGender] = useState('');
-  const updateGender = e => {
-    setGender(e.target.value);
-  };
+const schema = yup.object({
+  email: yup
+    .string('Enter a email')
+    .email('Email should contains at least 3 characters')
+    .required('Email is required'),
+  password: yup
+    .string('Enter your password')
+    .min(6, 'Password should contains at least 5 characters')
+    .required('Password is required'),
+});
 
+export default function RegisterForm() {
   const [email, setEmail] = useState('');
   const updateEmail = e => {
     setEmail(e.target.value);
@@ -27,13 +37,26 @@ export default function RegisterForm() {
     setMatch(password === e.target.value);
   };
 
+  const [gender, setGender] = useState('');
+  const updateGender = e => {
+    setGender(e.target.value);
+  };
+
   const [match, setMatch] = useState(false);
+  const [hide, setHide] = useState('password');
+  const tooglePass = () => {
+    setHide(hide === 'text' ? 'password' : 'text');
+  };
+
+  const [hideCoPass, setHideCoPass] = useState('password');
+  const toogleCoPass = () => {
+    setHideCoPass(hideCoPass === 'text' ? 'password' : 'text');
+  };
 
   const handleSubmit = e => {
     e.preventDefault();
 
     console.log({ gender, email, password, coPassword });
-    console.log('match', match);
 
     setGender('');
     setEmail('');
@@ -42,48 +65,18 @@ export default function RegisterForm() {
     setMatch(false);
   };
 
-  // console.log('match', match);
   return (
     <div>
-      <form onSubmit={handleSubmit} className="authForm" autoComplete="off">
-        <div>
-          <Logo />
-        </div>
-
+      <form
+        onSubmit={handleSubmit}
+        validationSchema={schema}
+        className="authForm"
+        autoComplete="off"
+      >
+        <Logo />
         <h1 className="title">Sign Up with email</h1>
 
-        <label className="authLabel">
-          Gender
-          <div className="radio_div" onChange={updateGender}>
-            <label>
-              <input
-                className="radio"
-                type="radio"
-                value="Male"
-                name="gender"
-              />
-              <Male />
-            </label>
-            <label>
-              <input
-                className="radio"
-                type="radio"
-                value="Female"
-                name="gender"
-              />
-              <Female />
-            </label>
-            <label>
-              <input
-                className="radio"
-                type="radio"
-                value="Other"
-                name="gender"
-              />
-              <Other />
-            </label>
-          </div>
-        </label>
+        <Gender updateGender={updateGender} />
 
         <label className="authLabel">
           E-mail
@@ -98,9 +91,12 @@ export default function RegisterForm() {
 
         <label className="authLabel">
           Create Password
+          <span onClick={tooglePass}>
+            <Eye />
+          </span>
           <input
             className="input"
-            type="password"
+            type={hide}
             name="password"
             value={password}
             onChange={updatePassword}
@@ -109,38 +105,26 @@ export default function RegisterForm() {
 
         <label className="authLabel">
           Confirm Password
+          <span onClick={toogleCoPass}>
+            <Eye />
+          </span>
           <input
             className="input"
-            type="password"
+            type={hideCoPass}
             name="coPassword"
             value={coPassword}
             onChange={updateCoPassword}
           />
         </label>
 
-        {!match && coPassword.length > 5 && (
-          <p className="error">Password does not match. Try again</p>
-        )}
-
-        {/* {match && password.length>5 ? (
-          <button className="btn" type="submit">
-            <span className="text_sign_up">Sign Up</span>
-          </button>
-        ) : (
-          <div className="disable" type="submit">
-            <span className="text_sign_up">Sign Up</span>
-          </div>
+        {/* {password.length > 0 && password.length < 6 && (
+          <p className="error">Password must be longer than six characters</p>
         )} */}
+        {!match && coPassword.length > 5 && <MatchMessage />}
 
-        <button className="btn" type="submit">
-          <span className="text_sign_up">Sign Up</span>
-        </button>
-        <div className="form_text">
-          Already have an account? <a href="URL">Log In</a>
-        </div>
-        <div className="form_text">
-          Review privacy and disclosures <a href="URL">here</a>
-        </div>
+        <Button />
+
+        <Footer />
       </form>
     </div>
   );
